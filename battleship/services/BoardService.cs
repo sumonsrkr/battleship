@@ -47,11 +47,8 @@ namespace battleship.services
 
         private void RecalculateShipPosition(Ship ship)
         {
-            int startX = -1;
-            int endX = -1;
-            int startY = -1;
-            int endY = -1;
-
+            int startX;
+            int endX;
             if (ship.StartPosition.X <= ship.EndPosition.X)
             {
                 startX = ship.StartPosition.X;
@@ -63,6 +60,8 @@ namespace battleship.services
                 endX = ship.StartPosition.X;
             }
 
+            int startY;
+            int endY;
             if (ship.StartPosition.Y <= ship.EndPosition.Y)
             {
                 startY = ship.StartPosition.Y;
