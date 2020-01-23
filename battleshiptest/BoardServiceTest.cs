@@ -3,26 +3,42 @@ using battleship.models;
 using battleship.services;
 using NUnit.Framework;
 using System;
+using System.Collections.Generic;
 
 namespace battleshiptest
 {
     [TestFixture]
     public class BoardServiceTest
     {
-        BoardService boardService;
+        BoardService _boardService;
+        int _boardWidth;
+        int _boardHeight;
+
+        List<Position> _attackPositions;
 
         [SetUp]
         public void Setup()
         {
-            
+            _boardWidth = 10;
+            _boardHeight = 10;
+
+            _attackPositions = new List<Position>();
+
+            for (int x = 0; x < _boardHeight; x++)
+            {
+                for (int y = 0; y < 5; y++)
+                {
+                    _attackPositions.Add(new Position(x, y));
+                }
+            }
         }
 
         [Test]
         public void InvalidBoardSizeTest()
         {
-            boardService = new BoardService(new Board(-10, 10));
+            _boardService = new BoardService(new Board(-10, 10));
 
-            Assert.Throws<Exception>(() => boardService.SetupBoard());
+            Assert.Throws<Exception>(() => _boardService.SetupBoard());
         }
 
 
@@ -37,17 +53,17 @@ namespace battleshiptest
         [TestCase(1, 1, 3, 3, 1, 1)]
         public void HitTestForOneShipInTheBoard(int posX1, int posY1, int posX2, int posY2, int attackX, int attackY)
         {
-            boardService = new BoardService(new Board(10, 10));
-            boardService.SetupBoard();
+            _boardService = new BoardService(new Board(_boardWidth, _boardHeight));
+            _boardService.SetupBoard();
 
             Position start = new Position(posX1, posY1);
             Position end = new Position(posX2, posY2);
 
             Ship ship = new Ship(start, end);
 
-            boardService.AddShip(ship);
+            _boardService.AddShip(ship);
 
-            bool isHit = boardService.Attack(new Position(attackX, attackY));
+            bool isHit = _boardService.Attack(new Position(attackX, attackY));
 
             Assert.AreEqual(isHit, true);
         }
@@ -63,42 +79,63 @@ namespace battleshiptest
         [TestCase(1, 1, 3, 3, 30, 300)]
         public void MissTestForOneShipInTheBoard(int posX1, int posY1, int posX2, int posY2, int attackX, int attackY)
         {
-            boardService = new BoardService(new Board(10, 10));
-            boardService.SetupBoard();
+            _boardService = new BoardService(new Board(_boardWidth, _boardHeight));
+            _boardService.SetupBoard();
 
             Position start = new Position(posX1, posY1);
             Position end = new Position(posX2, posY2);
 
             Ship ship = new Ship(start, end);
 
-            boardService.AddShip(ship);
+            _boardService.AddShip(ship);
 
-            bool isHit = boardService.Attack(new Position(attackX, attackY));
+            bool isHit = _boardService.Attack(new Position(attackX, attackY));
 
             Assert.AreEqual(isHit, false);
         }
 
-        [Test]
-        public void SinkTestForOneShipOnTheBoard()
+        [TestCase(0, 0, 0, 0)]
+        [TestCase(2, 2, 2, 2)]
+        [TestCase(1, 1, 3, 4)]
+        [TestCase(0, 0, 9, 4)]
+        public void SinkTestForOneShipOnTheBoard(int shipStartPosX, int shipStartPosY, int shipEndPosX, int shipEndPosY)
         {
-            boardService = new BoardService(new Board(10, 10));
-            boardService.SetupBoard();
+            _boardService = new BoardService(new Board(_boardWidth, _boardHeight));
 
-            Position start = new Position(0, 0);
-            Position end = new Position(0, 1);
+            _boardService.SetupBoard();
 
-            Ship ship = new Ship(start, end);
+            Ship ship = new Ship(new Position(shipStartPosX, shipStartPosY), new Position(shipEndPosX, shipEndPosY));
 
-            boardService.AddShip(ship);
+            _boardService.AddShip(ship);
 
-            boardService.Attack(start);
-            boardService.Attack(start);
-            boardService.Attack(new Position(100, 100));
-            Assert.AreEqual(boardService.AllShipsSunk, false);
+            foreach (Position position in _attackPositions)
+            {
+                _boardService.Attack(position);
+            }
 
-            boardService.Attack(end);
+            Assert.AreEqual(_boardService.AllShipsSunk, true);
+        }
 
-            Assert.AreEqual(boardService.AllShipsSunk, true);
+        [TestCase(0, 0, 0, 5)]
+        [TestCase(2, 2, 2, 9)]
+        [TestCase(1, 1, 3, 20)]
+        [TestCase(0, 0, 100, 100)]
+        public void UnsinkTestForOneShipOnTheBoard(int shipStartPosX, int shipStartPosY, int shipEndPosX, int shipEndPosY)
+        {
+            _boardService = new BoardService(new Board(_boardWidth, _boardHeight));
+
+            _boardService.SetupBoard();
+
+            Ship ship = new Ship(new Position(shipStartPosX, shipStartPosY), new Position(shipEndPosX, shipEndPosY));
+
+            _boardService.AddShip(ship);
+
+            foreach (Position position in _attackPositions)
+            {
+                _boardService.Attack(position);
+            }
+
+            Assert.AreEqual(_boardService.AllShipsSunk, false);
         }
     }
 }
