@@ -1,4 +1,4 @@
-# battleship
+# battleship state-tracker
 
 This is a C# project.
 

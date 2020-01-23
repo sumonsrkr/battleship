@@ -137,5 +137,37 @@ namespace battleshiptest
 
             Assert.AreEqual(_boardService.AllShipsSunk, false);
         }
+
+        [TestCase(0, 0, 0, 0)]
+        [TestCase(2, 2, 2, 2)]
+        [TestCase(1, 1, 3, 4)]
+        [TestCase(0, 0, 9, 4)]
+        public void ABattleShipCanBeAddedTest(int shipStartPosX, int shipStartPosY, int shipEndPosX, int shipEndPosY)
+        {
+            _boardService = new BoardService(new Board(_boardWidth, _boardHeight));
+
+            _boardService.SetupBoard();
+
+            Ship ship = new Ship(new Position(shipStartPosX, shipStartPosY), new Position(shipEndPosX, shipEndPosY));
+
+            bool added = _boardService.AddShip(ship);
+
+            Assert.AreEqual(added, true);
+        }
+
+        [TestCase(1, 1, 3, 20)]
+        [TestCase(0, 0, 100, 100)]
+        public void ABattleShipCannotBeAddedTest(int shipStartPosX, int shipStartPosY, int shipEndPosX, int shipEndPosY)
+        {
+            _boardService = new BoardService(new Board(_boardWidth, _boardHeight));
+
+            _boardService.SetupBoard();
+
+            Ship ship = new Ship(new Position(shipStartPosX, shipStartPosY), new Position(shipEndPosX, shipEndPosY));
+
+            bool added = _boardService.AddShip(ship);
+
+            Assert.AreEqual(added, false);
+        }
     }
 }
